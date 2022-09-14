@@ -6,15 +6,10 @@ from dataclasses import dataclass
 import scrapy
 
 
-def get_urls(location_ids: list, item_types: list, price_max: int, total_pages: int = 1) -> list:
+def get_url(location_ids: list, item_types: list, price_max: int):
     location_id_params = "&".join([f"location_ids[]={location_id}" for location_id in location_ids])
     item_type_params = "&".join([f"item_types[]={item_type}" for item_type in item_types])
-
-    url = f"https://www.hemnet.se/bostader?{location_id_params}&{item_type_params}&price_max={price_max}"
-    if total_pages <= 1:
-        return [url]
-    else:
-        return [url] + [f"{url}&page={i}" for i in range(2, total_pages + 1)]
+    return f"https://www.hemnet.se/bostader?{location_id_params}&{item_type_params}&price_max={price_max}"
 
 
 @dataclass
@@ -39,8 +34,9 @@ class HouseSpider(scrapy.Spider):
     handle_httpstatus_list = [404]
 
     def start_requests(self):
-        urls = []
-        urls += get_urls(["18042", "18028"], ["bostadsratt"], 2500000, 10)  # Solna & Sundbyberg
+        urls = [
+            get_url(["18042", "18028"], ["bostadsratt"], 2500000)  # Solna & Sundbyberg
+        ]
 
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
@@ -48,3 +44,7 @@ class HouseSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         if response.status == 404:
             return
+
+        next_page = response.css("a.next_page::attr(href)").get()
+        if next_page is not None:
+            yield response.follow(url=next_page, callback=self.parse)
