@@ -7,11 +7,10 @@ import scrapy
 
 
 def get_urls(location_ids: list, item_types: list, price_max: int, total_pages: int = 1) -> list:
-    location_id_params = "&".join([f"location_ids[]={id}" for id in location_ids])
+    location_id_params = "&".join([f"location_ids[]={location_id}" for location_id in location_ids])
     item_type_params = "&".join([f"item_types[]={item_type}" for item_type in item_types])
 
     url = f"https://www.hemnet.se/bostader?{location_id_params}&{item_type_params}&price_max={price_max}"
-
     if total_pages <= 1:
         return [url]
     else:
