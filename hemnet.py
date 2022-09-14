@@ -7,8 +7,8 @@ import scrapy
 
 
 def get_url(location_ids: list, item_types: list, price_max: int):
-    location_id_params = "&".join([f"location_ids[]={location_id}" for location_id in location_ids])
-    item_type_params = "&".join([f"item_types[]={item_type}" for item_type in item_types])
+    location_id_params = "&".join([f"location_ids%5B%5D={location_id}" for location_id in location_ids])
+    item_type_params = "&".join([f"item_types%5B%5D={item_type}" for item_type in item_types])
     return f"https://www.hemnet.se/bostader?{location_id_params}&{item_type_params}&price_max={price_max}"
 
 
@@ -31,7 +31,6 @@ class HouseData:
 
 class HouseSpider(scrapy.Spider):
     name = "housespider"
-    handle_httpstatus_list = [404]
 
     def start_requests(self):
         urls = [
@@ -42,9 +41,6 @@ class HouseSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
-        if response.status == 404:
-            return
-
         next_page = response.css("a.next_page::attr(href)").get()
         if next_page is not None:
             yield response.follow(url=next_page, callback=self.parse)
