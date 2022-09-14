@@ -6,20 +6,17 @@ from dataclasses import dataclass
 import scrapy
 
 
-@dataclass
-class Search:
-    location_ids: list
-    item_types: list
-    price_max: int
+def get_urls(location_ids: list, item_types: list, price_max: int, total_pages: int = 1) -> list:
+    location_id_params = "&".join([f"location_ids[]={id}" for id in location_ids])
+    item_type_params = "&".join([f"item_types[]={item_type}" for item_type in item_types])
 
-    def get_urls(self, total_pages: int = 1) -> list:
-        location_id_params = "&".join([f"location_ids[]={id}" for id in self.location_ids])
-        item_type_params = "&".join([f"item_types[]={item_type}" for item_type in self.item_types])
-        url = f"https://www.hemnet.se/bostader?{location_id_params}&{item_type_params}&price_max={self.price_max}"
-        if total_pages <= 1:
-            return [url]
-        else:
-            return [url] + [f"{url}&page={i}" for i in range(2, total_pages + 1)]
+    url = f"https://www.hemnet.se/bostader?{location_id_params}&{item_type_params}&price_max={price_max}"
+
+    if total_pages <= 1:
+        return [url]
+    else:
+        return [url] + [f"{url}&page={i}" for i in range(2, total_pages + 1)]
+
 
 @dataclass
 class HouseData:
@@ -44,7 +41,7 @@ class HouseSpider(scrapy.Spider):
 
     def start_requests(self):
         urls = []
-        urls += Search(["18042", "18028"], ["bostadsratt"], 2500000).get_urls(10)  # Solna & Sundbyberg
+        urls += get_urls(["18042", "18028"], ["bostadsratt"], 2500000, 10)  # Solna & Sundbyberg
 
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
