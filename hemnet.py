@@ -1,6 +1,7 @@
 """
 Written for hemnet.se 2022-09-14
 """
+import unicodedata
 from dataclasses import dataclass
 
 import scrapy
@@ -14,7 +15,6 @@ def get_url(location_ids: list, item_types: list, price_max: int):
 
 @dataclass
 class HouseData:
-    headers = "Adress;Område;Storlek;Rum;Pris;Avgift;Pris/kvm;Länk"
     address: str
     neighborhood: str
     size: int           # m^2
@@ -23,10 +23,6 @@ class HouseData:
     fee: int            # kr/mån
     price_sqr_ft: int   # kr/m^2
     url: str
-
-    def __str__(self):
-        return ";".join([self.address, self.neighborhood, str(self.size), str(self.rooms), str(self.price),
-                         str(self.fee), str(self.price_sqr_ft), self.url])
 
 
 class HouseSpider(scrapy.Spider):
@@ -41,6 +37,20 @@ class HouseSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
+        count = len(response.css("li.js-normal-list-item"))
+
+        for i in range(count):
+            yield {
+                "Adress": (response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[1]/div/h2/text()").get() or "").strip(),
+                "Område": (response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[1]/div/div/span[2]/text()").get() or "").strip(),
+                "Pris": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[1]/text()").get() or "").strip(),
+                "Yta": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[2]/text()").get() or "").strip(),
+                "Rum": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[3]/text()").get() or "").strip(),
+                "Avgift": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[2]/div[1]/text()").get() or "").strip(),
+                "Pris/kvm": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[2]/div[2]/text()").get() or "").strip(),
+                "Länk": (response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/@href").get() or "").strip()
+            }
+
         next_page = response.css("a.next_page::attr(href)").get()
         if next_page is not None:
             yield response.follow(url=next_page, callback=self.parse)
