@@ -26,18 +26,18 @@ class HouseSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         count = len(response.css("li.js-normal-list-item"))
 
-        for i in range(count):
+        for i in range(1, count):
             yield {
-                "Adress": (response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[1]/div/h2/text()").get() or "").strip(),
-                "Område": (response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[1]/div/div/span[2]/text()").get() or "").strip(),
-                "Pris": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[1]/text()").get() or "").strip(),
-                "Yta": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[2]/text()").get() or "").strip(),
-                "Rum": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[3]/text()").get() or "").strip(),
-                "Avgift": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[2]/div[1]/text()").get() or "").strip(),
-                "Pris/kvm": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[2]/div[2]/text()").get() or "").strip(),
-                "Länk": (response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/@href").get() or "").strip()
+                "Adress": response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[1]/div/h2/text()").get().strip(),
+                "Område": response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[1]/div/div/span[2]/text()").get().strip(),
+                "Pris (kr)": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[1]/text()").get()).replace("kr", "").strip().replace(" ", ""),
+                "Yta (m2)": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[2]/text()").get()).replace("m2", "").strip(),
+                "Rum": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[3]/text()").get()).replace("rum", "").strip(),
+                "Avgift (kr/mån)": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[2]/div[1]/text()").get()).encode("ascii", "ignore").decode("utf-8").replace("kr/man", "").strip(),
+                "Pris/kvm (kr/m2)": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[2]/div[2]/text()").get()).replace("kr/m2", "").strip(),
+                "Länk": response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/@href").get().strip()
             }
-            
+
         next_page = response.css("a.next_page::attr(href)").get()
         if next_page is not None:
             yield response.follow(url=next_page, callback=self.parse)
