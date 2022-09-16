@@ -27,15 +27,24 @@ class HouseSpider(scrapy.Spider):
         count = len(response.css("li.js-normal-list-item"))
 
         for i in range(1, count):
+            address = response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[1]/div/h2/text()").get()
+            area = response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[1]/div/div/span[2]/text()").get()
+            price = unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[1]/text()").get())
+            size = unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[2]/text()").get())
+            rooms = unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[3]/text()").get())
+            fee = unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[2]/div[1]/text()").get())
+            price_per_m2 = unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[2]/div[2]/text()").get())
+            url = response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/@href").get()
+
             yield {
-                "Adress": response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[1]/div/h2/text()").get().strip(),
-                "Område": response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[1]/div/div/span[2]/text()").get().strip(),
-                "Pris (kr)": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[1]/text()").get()).replace("kr", "").strip().replace(" ", ""),
-                "Yta (m2)": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[2]/text()").get()).replace("m2", "").strip(),
-                "Rum": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[1]/div[3]/text()").get()).replace("rum", "").strip(),
-                "Avgift (kr/mån)": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[2]/div[1]/text()").get()).encode("ascii", "ignore").decode("utf-8").replace("kr/man", "").strip(),
-                "Pris/kvm (kr/m2)": unicodedata.normalize("NFKD", response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/div[2]/div/div[2]/div[2]/div[2]/text()").get()).replace("kr/m2", "").strip(),
-                "Länk": response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/@href").get().strip()
+                "Adress": address.strip(),
+                "Område": area.strip(),
+                "Pris (kr)": price.replace("kr", "").strip().replace(" ", ""),
+                "Yta (m2)": size.replace("m2", "").strip(),
+                "Rum": rooms.replace("rum", "").strip(),
+                "Avgift (kr/mån)": fee.encode("ascii", "ignore").decode("utf-8").replace("kr/man", "").strip().replace(" ", ""),
+                "Pris/kvm (kr/m2)": price_per_m2.replace("kr/m2", "").strip().replace(" ", ""),
+                "Länk": url.strip()
             }
 
         next_page = response.css("a.next_page::attr(href)").get()
