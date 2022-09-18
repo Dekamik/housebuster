@@ -5,6 +5,8 @@ import unicodedata
 
 import scrapy
 
+from hemnet_config import known_location_ids
+
 
 def build_url(location_ids: list, item_types: list, price_max: int) -> str:
     location_id_params = "&".join([f"location_ids%5B%5D={location_id}" for location_id in location_ids])
@@ -57,13 +59,23 @@ def get_features_index(balcony, patio, floor, has_elevator) -> float:
 class HouseSpider(scrapy.Spider):
     name = "housespider"
 
+    def __init__(self, ids=None, names=None, max_price=2500000, *args, **kwargs):
+        super(HouseSpider, self).__init__(*args, **kwargs)
+        self.ids = ids
+        self.names = names
+        self.max_price = max_price
+
     def start_requests(self):
-        urls = [
-            build_url(["18042", "18028"], ["bostadsratt"], 2500000),                        # Solna & Sundbyberg
-            # build_url(["17853"], ["bostadsratt"], 2500000),                                 # Nacka
-            build_url(["473337", "898740"], ["bostadsratt"], 2500000),                      # Alvik & Bromma
-            build_url(["925961", "473424", "473365", "941046"], ["bostadsratt"], 2500000)   # Enskede, Stureby, Gubbängen, Enskede - Skarpnäck
-        ]
+        urls = []
+        if self.ids is not None:
+            for location_id in self.ids:
+                urls.append(build_url([location_id], ["bostadsratt"], self.max_price))
+        elif self.names is not None:
+            for name in self.names:
+                urls.append(build_url([known_location_ids[name]], ["bostadsratt"], self.max_price))
+        else:
+            for location_id in known_location_ids.values():
+                urls.append(build_url([location_id], ["bostadsratt"], self.max_price))
 
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
