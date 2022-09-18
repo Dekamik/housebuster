@@ -68,10 +68,10 @@ class HouseSpider(scrapy.Spider):
     def start_requests(self):
         urls = []
         if self.ids is not None:
-            for location_id in self.ids:
+            for location_id in self.ids.split(","):
                 urls.append(build_url([location_id], ["bostadsratt"], self.max_price))
         elif self.names is not None:
-            for name in self.names:
+            for name in self.names.split(","):
                 urls.append(build_url([known_location_ids[name]], ["bostadsratt"], self.max_price))
         else:
             for location_id in known_location_ids.values():
