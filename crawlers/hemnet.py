@@ -5,7 +5,7 @@ import unicodedata
 
 import scrapy
 
-from hemnet_config import known_location_ids
+from config import hemnet_known_location_ids
 
 
 def build_url(location_ids: list, item_types: list, price_max: int) -> str:
@@ -72,9 +72,9 @@ class HouseSpider(scrapy.Spider):
                 urls.append(build_url([location_id], ["bostadsratt"], self.max_price))
         elif self.names is not None:
             for name in self.names.split(","):
-                urls.append(build_url([known_location_ids[name]], ["bostadsratt"], self.max_price))
+                urls.append(build_url([hemnet_known_location_ids[name]], ["bostadsratt"], self.max_price))
         else:
-            for location_id in known_location_ids.values():
+            for location_id in hemnet_known_location_ids.values():
                 urls.append(build_url([location_id], ["bostadsratt"], self.max_price))
 
         for url in urls:

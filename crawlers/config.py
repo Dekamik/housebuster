@@ -1,4 +1,4 @@
-known_location_ids = {
+hemnet_known_location_ids = {
     "bromma": "898740",
     "enskede": "925961",
     "enskede-skarpnäck": "941046",
