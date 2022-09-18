@@ -71,7 +71,7 @@ class HouseSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         count = len(response.css("li.js-normal-list-item"))
         for i in range(1, count):
-            url = response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/@href").get().strip()
+            url = response.xpath(f"//li[contains(@class, 'js-normal-list-item')][{i}]/a/@href").get()
             yield response.follow(url=url, callback=self.parse_detail)
 
         next_page = response.css("a.next_page::attr(href)").get()
@@ -119,10 +119,10 @@ class HouseSpider(scrapy.Spider):
                 "Avgift": fee,
                 "Driftkostnad": operational_costs,
                 "Pris/m2": price_m2,
-                "Prisindex": str(price_idx).replace(".", ","),
-                "Storleksindex": str(size_idx).replace(".", ","),
-                "Funktionsindex": str(features_idx).replace(".", ","),
-                "Totalindex": str(total_idx).replace(".", ","),
+                "Prisindex": price_idx,
+                "Storleksindex": size_idx,
+                "Funktionsindex": features_idx,
+                "Totalindex": total_idx,
                 "Länk": response.url
             }
 
