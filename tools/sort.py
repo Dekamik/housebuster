@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Usage: sort.py <path_to_file>
 
@@ -19,7 +20,7 @@ if __name__ == "__main__":
     if ".csv" in file:
         df = pd.read_csv(file)
         sort(df)
-        df.to_csv(file)
+        df.to_csv(file, index=False)
 
     elif ".json" in file:
         df = pd.read_json(file)
