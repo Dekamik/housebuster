@@ -3,6 +3,7 @@ Usage: sort.py <path_to_file>
 
 Sorts all entries in file based on Totalindex
 """
+import os.path
 import sys
 
 import pandas as pd
@@ -29,4 +30,10 @@ if __name__ == "__main__":
     elif ".json" in file:
         sort_json(file)
 
+    else:
+        ext = os.path.splitext(file)[1]
+        print(f"Unsupported filetype {ext}")
+        sys.exit(1)
+
+    print(f"Sorted {file}")
     sys.exit(0)
