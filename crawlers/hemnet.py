@@ -5,7 +5,17 @@ import unicodedata
 
 import scrapy
 
-from config import hemnet_known_location_ids
+
+hemnet_known_location_ids = {
+    "bromma": "898740",
+    "enskede": "925961",
+    "enskede-skarpnäck": "941046",
+    "gubbängen": "473365",
+    "nacka": "17853",
+    "solna": "18028",
+    "stureby": "473424",
+    "sundbyberg": "18042"
+}
 
 
 def build_url(location_ids: list, item_types: list, price_max: int) -> str:
@@ -56,11 +66,11 @@ def get_features_index(balcony, patio, floor, has_elevator) -> float:
     return balcony_idx + patio_idx + floor_idx
 
 
-class HouseSpider(scrapy.Spider):
+class HemnetSpider(scrapy.Spider):
     name = "housespider"
 
     def __init__(self, ids=None, names=None, max_price=2500000, *args, **kwargs):
-        super(HouseSpider, self).__init__(*args, **kwargs)
+        super(HemnetSpider, self).__init__(*args, **kwargs)
         self.ids = ids
         self.names = names
         self.max_price = max_price
