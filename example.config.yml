@@ -1,0 +1,11 @@
+crawler_settings:
+  balcony_bias: -1000
+  elevator_bias: -750
+  fee_mul: 0.2
+  highest_floor_bias: -1000
+  lowest_floor_bias: 0
+  max_price: 2500000
+  patio_bias: -1000
+  preferred_floor: '1'
+  preferred_floor_bias: 0
+  price_mul: 0.001

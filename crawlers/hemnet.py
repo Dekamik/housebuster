@@ -1,6 +1,8 @@
 """
 Written for hemnet.se 2022-09-17
 """
+from dataclasses import dataclass
+
 import unicodedata
 
 import scrapy
@@ -18,6 +20,19 @@ hemnet_known_location_ids = {
 }
 
 
+@dataclass
+class FeatureAnalysisConfig:
+    balcony_bias: float
+    patio_bias: float
+
+    highest_floor_bias: float
+    nth_floor_bias: float
+    preferred_floor: str
+    lowest_floor_bias: float
+
+    elevator_bias: float
+
+
 def build_url(location_ids: list, item_types: list, price_max: int) -> str:
     location_id_params = "&".join([f"location_ids%5B%5D={location_id}" for location_id in location_ids])
     item_type_params = "&".join([f"item_types%5B%5D={item_type}" for item_type in item_types])
@@ -29,10 +44,8 @@ def parse_currency(raw, denomination) -> int:
                .replace(" ", "").strip())
 
 
-def get_price_index(price, fee) -> float:
-    price_idx = price / 1000
-    fee_idx = fee / 5
-    return price_idx + fee_idx
+def get_price_index(price, fee, price_mul, fee_mul) -> float:
+    return (price * price_mul) + (fee * fee_mul)
 
 
 def get_size_index(size, rooms) -> float:
@@ -45,25 +58,28 @@ def get_size_index(size, rooms) -> float:
     return size_idx + room_idx
 
 
-def get_features_index(balcony, patio, floor, has_elevator) -> float:
+def get_features_index(balcony, patio, floor, has_elevator, config: FeatureAnalysisConfig) -> float:
+    features_index = 0
+
     if balcony == "Ja":
-        balcony_idx = 0
-    else:
-        balcony_idx = 1000
+        features_index += config.balcony_bias
 
     if patio == "Ja":
-        patio_idx = 0
-    else:
-        patio_idx = 1000
+        features_index += config.patio_bias
 
     if floor[0:1] == floor[5:6]:
-        floor_idx = 500
-        if has_elevator:
-            floor_idx = 0
-    else:
-        floor_idx = 2000
+        features_index += config.highest_floor_bias
 
-    return balcony_idx + patio_idx + floor_idx
+    if floor[0:1] in ("0", "1", "-"):
+        features_index += config.lowest_floor_bias
+
+    if len(floor) > 1 and floor[0:floor.index(" ")] == config.preferred_floor:
+        features_index += config.nth_floor_bias
+
+    if has_elevator:
+        features_index += config.elevator_bias
+
+    return features_index
 
 
 class HemnetSpider(scrapy.Spider):
