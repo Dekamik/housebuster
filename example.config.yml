@@ -2,13 +2,13 @@ crawler_settings:
   balcony_pts: 1000
   elevator_pts: 750
   fee_mul: -0.2
-  highest_floor_pts: 1000
+  highest_floor_pts: 10000
   lowest_floor_pts: 0
   max_price: 2500000
   patio_pts: 1000
   preferred_floor: '1'
   preferred_floor_pts: 0
   price_mul: -0.001
-  pts_adjust: 3000
+  pts_adjust: 0
   rooms_mul: 1000.0
   size_mul: 25.0
