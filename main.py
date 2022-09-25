@@ -1,4 +1,6 @@
+import csv
 import tkinter as tk
+import tkinter.filedialog
 from tkinter import messagebox
 
 import tksheet as tks
@@ -67,7 +69,13 @@ class Program(tk.Tk):
             messagebox.showinfo("Saved", "Crawler settings saved")
 
     def save_crawler_results(self):
-        pass
+        with tkinter.filedialog.asksaveasfile(mode="w", filetypes=[("CSV files", "*.csv"), ("All files", "*.*")], defaultextension=".csv") as f:
+            if f is None:
+                return
+            keys = self.results[0].keys()
+            dw = csv.DictWriter(f, keys)
+            dw.writeheader()
+            dw.writerows(self.results)
 
     def __init__(self):
         tk.Tk.__init__(self)
@@ -127,7 +135,7 @@ class Program(tk.Tk):
 
         self.btn_save_settings = tk.Button(frm_sidebar, text="Save Crawler Settings", command=self.save_crawler_settings)
         self.btn_crawl = tk.Button(frm_sidebar, text="Crawl", command=self.crawl)
-        self.btn_save = tk.Button(frm_sidebar, text="Save Items As...")
+        self.btn_save = tk.Button(frm_sidebar, text="Save Items As...", command=self.save_crawler_results)
         self.btn_save_settings.grid(row=14, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
         self.btn_crawl.grid(row=15, column=0, sticky="ew", padx=5, pady=5)
         self.btn_save.grid(row=15, column=1, sticky="ew", padx=5, pady=5)
