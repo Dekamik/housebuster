@@ -9,5 +9,5 @@ crawler_settings:
   preferred_floor: '1'
   preferred_floor_bias: 0
   price_mul: 0.001
-  rooms_mul: -1000
-  size_mul: -25
+  rooms_mul: -1000.0
+  size_mul: -25.0
