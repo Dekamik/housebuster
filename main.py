@@ -1,8 +1,6 @@
-import time
 import tkinter as tk
 from tkinter import messagebox
 
-import yaml
 import tksheet as tks
 from scrapy import signals
 from scrapy.crawler import CrawlerProcess
@@ -10,17 +8,23 @@ from scrapy.signalmanager import dispatcher
 
 from components import entry
 from crawlers.hemnet import HemnetSpider
+from files import config
 
 
 class Program(tk.Tk):
     def crawl(self):
+        if self.has_been_run:
+            messagebox.showerror("Restart program", "Crawler cannot run twice due to technical limitations.\n"
+                                                    "Please restart the program to run again")
+
         self.results = []
         self.var_msg.set("Initializing, please wait...")
 
         parsed_search_text = self.txt_search.get("1.0", tk.END)\
-            .replace(" ", "")\
             .replace("\n", ",")\
-            .replace(",,", ",")
+            .replace(",,", ",")\
+            .replace(", ", ",")\
+            .strip()
         if parsed_search_text[-1] == ",":
             parsed_search_text = parsed_search_text[:-1]
 
@@ -38,11 +42,9 @@ class Program(tk.Tk):
             self.var_msg.set(f"Scraping item {len(self.results)}")
             self.update()
 
-        self.btn_crawl["state"] = tk.DISABLED
-        self.update()
-
         dispatcher.connect(crawler_results, signal=signals.item_scraped)
 
+        self.has_been_run = True
         process = CrawlerProcess()
         process.crawl(HemnetSpider, names=parsed_search_text, max_price=parsed_max_price)
         process.start()
@@ -65,22 +67,22 @@ class Program(tk.Tk):
         self.config["crawler_settings"]["preferred_floor"] = self.var_preferred_floor.get()
         self.config["crawler_settings"]["lowest_floor_bias"] = self.var_lowest_floor_bias.get()
         self.config["crawler_settings"]["elevator_bias"] = self.var_elevator_bias.get()
-
-        with open("config.yml", "w") as stream:
-            yaml.safe_dump(self.config, stream)
-
+        config.save(self.config)
         messagebox.showinfo("Saved", "Crawler settings saved")
+
+    def save_crawler_results(self):
+        pass
 
     def __init__(self):
         tk.Tk.__init__(self)
+        self.has_been_run = False
 
         # Configuration
         self.title("housebuster")
         self.rowconfigure(0, minsize=240, weight=1)
         self.columnconfigure(1, minsize=120, weight=1)
 
-        with open("config.yml", "r") as stream:
-            self.config = yaml.safe_load(stream)
+        self.config = config.load()
 
         crawler_settings = self.config["crawler_settings"]
 
@@ -90,6 +92,8 @@ class Program(tk.Tk):
         self.var_max_price = tk.IntVar(self, value=crawler_settings["max_price"])
         self.var_price_mul = tk.DoubleVar(self, value=crawler_settings["price_mul"])
         self.var_fee_mul = tk.DoubleVar(self, value=crawler_settings["fee_mul"])
+        self.var_size_mul = tk.DoubleVar(self, value=crawler_settings["size_mul"])
+        self.var_rooms_mul = tk.DoubleVar(self, value=crawler_settings["rooms_mul"])
         self.var_balcony_bias = tk.IntVar(self, value=crawler_settings["balcony_bias"])
         self.var_patio_bias = tk.IntVar(self, value=crawler_settings["patio_bias"])
         self.var_highest_floor_bias = tk.IntVar(self, value=crawler_settings["highest_floor_bias"])
@@ -108,7 +112,7 @@ class Program(tk.Tk):
         frm_sidebar = tk.Frame(self, relief=tk.RAISED, bd=2)
 
         lbl_search = tk.Label(frm_sidebar, text="Search")
-        self.txt_search = tk.Text(frm_sidebar, width=30, height=10)
+        self.txt_search = tk.Text(frm_sidebar, width=40, height=6)
         lbl_search.grid(row=0, column=0, columnspan=3, sticky="ns", padx=5, pady=5)
         self.txt_search.grid(row=1, column=0, columnspan=3, sticky="ns", padx=5, pady=5)
 

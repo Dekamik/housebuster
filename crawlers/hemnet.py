@@ -1,12 +1,11 @@
 """
 Written for hemnet.se 2022-09-17
 """
-from dataclasses import dataclass
-
 import unicodedata
 
 import scrapy
 
+from crawlers.hemnet_data import FeatureAnalysisConfig
 
 hemnet_known_location_ids = {
     "bromma": "898740",
@@ -18,19 +17,6 @@ hemnet_known_location_ids = {
     "stureby": "473424",
     "sundbyberg": "18042"
 }
-
-
-@dataclass
-class FeatureAnalysisConfig:
-    balcony_bias: float
-    patio_bias: float
-
-    highest_floor_bias: float
-    nth_floor_bias: float
-    preferred_floor: str
-    lowest_floor_bias: float
-
-    elevator_bias: float
 
 
 def build_url(location_ids: list, item_types: list, price_max: int) -> str:
@@ -48,14 +34,8 @@ def get_price_index(price, fee, price_mul, fee_mul) -> float:
     return (price * price_mul) + (fee * fee_mul)
 
 
-def get_size_index(size, rooms) -> float:
-    size_idx = (100 - size) * 50
-    room_idx = (2.5 - rooms) * 1000
-
-    if rooms == 1:
-        room_idx += 1000
-
-    return size_idx + room_idx
+def get_size_index(size, rooms, size_mul, rooms_mul) -> float:
+    return (size * size_mul) + (rooms * rooms_mul)
 
 
 def get_features_index(balcony, patio, floor, has_elevator, config: FeatureAnalysisConfig) -> float:
