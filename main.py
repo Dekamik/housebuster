@@ -18,9 +18,9 @@ class Program(tk.Tk):
         if self.has_been_run:
             messagebox.showerror("Restart program", "Crawler cannot run twice due to technical limitations.\n"
                                                     "Please restart the program to run again")
-
         self.results = []
         self.var_msg.set("Initializing, please wait...")
+        self.update()
 
         search_text = self.txt_search.get("1.0", tk.END)\
             .replace("\n", ",")\
