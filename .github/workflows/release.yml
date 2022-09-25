@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  release:
+    types:
+      - created
+jobs:
+  build:
+    name: Build
+    strategy:
+      matrix:
+        platform:
+          - os: ubuntu-latest
+            archive-content-type: application/gzip
+            archive-platform: linux-osx
+            archive-name: housebuster.tar.gz
+            archive-extension: tar.gz
+            archive-command: tar --transform 's/.*\///g' -czvf housebuster.tar.gz dist/housebuster README.md LICENSE default.config.yml
+
+          - os: windows-latest
+            archive-content-type: application/zip
+            archive-platform: windows
+            archive-name: housebuster.zip
+            archive-extension: zip
+            archive-command: tar.exe -a -c -f housebuster.zip dist\housebuster.exe README.md LICENSE default.config.yml
+
+    runs-on: ${{ matrix.platform.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+
+      - name: Setup build environment
+        run: |
+          pip3 install -r requirements.txt
+          pip3 install pyinstaller
+
+      - name: Build executable
+        run: pyinstaller -F main.py
+
+      - name: Create archive
+        run: ${{ matrix.platform.archive-command }}
+
+      - name: Upload archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ matrix.platform.archive-name }}
+          asset_name: autovpn_${{ github.event.release.tag_name }}_${{ matrix.platform.archive-platform }}.${{ matrix.platform.archive-extension }}
+          asset_content_type: ${{ matrix.platform.archive-content-type }}
