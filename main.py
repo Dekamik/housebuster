@@ -8,6 +8,7 @@ from scrapy import signals
 from scrapy.crawler import CrawlerProcess
 from scrapy.signalmanager import dispatcher
 
+from components import entry
 from crawlers.hemnet import HemnetSpider
 
 
@@ -111,55 +112,16 @@ class Program(tk.Tk):
         lbl_search.grid(row=0, column=0, columnspan=3, sticky="ns", padx=5, pady=5)
         self.txt_search.grid(row=1, column=0, columnspan=3, sticky="ns", padx=5, pady=5)
 
-        lbl_max_price = tk.Label(frm_sidebar, text="Max price")
-        ent_max_price = tk.Entry(frm_sidebar, textvariable=self.var_max_price)
-        lbl_max_price.grid(row=2, column=0, sticky="e", padx=5, pady=5)
-        ent_max_price.grid(row=2, column=1, sticky="w", padx=5, pady=5)
-
-        lbl_price_mul = tk.Label(frm_sidebar, text="Price bias multiplier")
-        ent_price_mul = tk.Entry(frm_sidebar, textvariable=self.var_price_mul)
-        lbl_price_mul.grid(row=3, column=0, sticky="e", padx=5, pady=5)
-        ent_price_mul.grid(row=3, column=1, sticky="w", padx=5, pady=5)
-
-        lbl_fee_mul = tk.Label(frm_sidebar, text="Fee bias multiplier")
-        ent_fee_mul = tk.Entry(frm_sidebar, textvariable=self.var_fee_mul)
-        lbl_fee_mul.grid(row=4, column=0, sticky="e", padx=5, pady=5)
-        ent_fee_mul.grid(row=4, column=1, sticky="w", padx=5, pady=5)
-
-        lbl_balcony = tk.Label(frm_sidebar, text="Balcony bias")
-        ent_balcony = tk.Entry(frm_sidebar, textvariable=self.var_balcony_bias)
-        lbl_balcony.grid(row=5, column=0, sticky="e", padx=5, pady=5)
-        ent_balcony.grid(row=5, column=1, sticky="w", padx=5, pady=5)
-
-        lbl_patio = tk.Label(frm_sidebar, text="Patio bias")
-        ent_patio = tk.Entry(frm_sidebar, textvariable=self.var_patio_bias)
-        lbl_patio.grid(row=6, column=0, sticky="e", padx=5, pady=5)
-        ent_patio.grid(row=6, column=1, sticky="w", padx=5, pady=5)
-
-        lbl_highest_floor = tk.Label(frm_sidebar, text="Highest floor bias")
-        ent_highest_floor = tk.Entry(frm_sidebar, textvariable=self.var_highest_floor_bias)
-        lbl_highest_floor.grid(row=7, column=0, sticky="e", padx=5, pady=5)
-        ent_highest_floor.grid(row=7, column=1, sticky="w", padx=5, pady=5)
-
-        lbl_preferred_floor = tk.Label(frm_sidebar, text="Preferred floor bias")
-        ent_preferred_floor = tk.Entry(frm_sidebar, textvariable=self.var_preferred_floor_bias)
-        lbl_preferred_floor.grid(row=8, column=0, sticky="e", padx=5, pady=5)
-        ent_preferred_floor.grid(row=8, column=1, sticky="w", padx=5, pady=5)
-
-        lbl_floor = tk.Label(frm_sidebar, text="Preferred floor")
-        ent_floor = tk.Entry(frm_sidebar, textvariable=self.var_preferred_floor)
-        lbl_floor.grid(row=9, column=0, sticky="e", padx=5, pady=5)
-        ent_floor.grid(row=9, column=1, sticky="w", padx=5, pady=5)
-
-        lbl_lowest_floor = tk.Label(frm_sidebar, text="Lowest floor bias")
-        ent_lowest_floor = tk.Entry(frm_sidebar, textvariable=self.var_lowest_floor_bias)
-        lbl_lowest_floor.grid(row=10, column=0, sticky="e", padx=5, pady=5)
-        ent_lowest_floor.grid(row=10, column=1, sticky="w", padx=5, pady=5)
-
-        lbl_elevator = tk.Label(frm_sidebar, text="Elevator bias")
-        ent_elevator = tk.Entry(frm_sidebar, textvariable=self.var_elevator_bias)
-        lbl_elevator.grid(row=11, column=0, sticky="e", padx=5, pady=5)
-        ent_elevator.grid(row=11, column=1, sticky="w", padx=5, pady=5)
+        entry.LabelledEntry(frm_sidebar, "Max price", self.var_max_price, 2)
+        entry.LabelledEntry(frm_sidebar, "Price bias multiplier", self.var_price_mul, 3)
+        entry.LabelledEntry(frm_sidebar, "Fee bias multiplier", self.var_fee_mul, 4)
+        entry.LabelledEntry(frm_sidebar, "Balcony bias", self.var_balcony_bias, 5)
+        entry.LabelledEntry(frm_sidebar, "Patio bias", self.var_patio_bias, 6)
+        entry.LabelledEntry(frm_sidebar, "Highest floor bias", self.var_highest_floor_bias, 7)
+        entry.LabelledEntry(frm_sidebar, "Preferred floor bias", self.var_preferred_floor_bias, 8)
+        entry.LabelledEntry(frm_sidebar, "Preferred floor", self.var_preferred_floor, 9)
+        entry.LabelledEntry(frm_sidebar, "Lowest floor bias", self.var_lowest_floor_bias, 10)
+        entry.LabelledEntry(frm_sidebar, "Elevator bias", self.var_elevator_bias, 11)
 
         self.btn_save_settings = tk.Button(frm_sidebar, text="Save Crawler Settings", command=self.save_crawler_settings)
         self.btn_crawl = tk.Button(frm_sidebar, text="Crawl", command=self.crawl)
