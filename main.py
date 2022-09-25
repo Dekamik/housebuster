@@ -22,7 +22,7 @@ class Program(tk.Tk):
         self.var_msg.set("Initializing, please wait...")
         self.update()
 
-        search_text = self.txt_search.get("1.0", tk.END)\
+        search_text = self.txt_search.text.get("1.0", tk.END)\
             .replace("\n", ",")\
             .replace(",,", ",")\
             .replace(", ", ",")\
@@ -117,32 +117,29 @@ class Program(tk.Tk):
         self.sht_results = tks.Sheet(self)
         frm_sidebar = tk.Frame(self, relief=tk.RAISED, bd=2)
 
-        lbl_search = tk.Label(frm_sidebar, text="Search")
-        self.txt_search = tk.Text(frm_sidebar, width=40, height=6)
-        lbl_search.grid(row=0, column=0, columnspan=3, sticky="ns", padx=5, pady=5)
-        self.txt_search.grid(row=1, column=0, columnspan=3, sticky="ns", padx=5, pady=5)
-
-        entry.LabelledEntry(frm_sidebar, "Max price", self.var_max_price, 2)
-        entry.LabelledEntry(frm_sidebar, "Price pts mul", self.var_price_mul, 3)
-        entry.LabelledEntry(frm_sidebar, "Fee pts mul", self.var_fee_mul, 4)
-        entry.LabelledEntry(frm_sidebar, "Size pts mul", self.var_size_mul, 5)
-        entry.LabelledEntry(frm_sidebar, "Rooms pts mul", self.var_rooms_mul, 6)
-        entry.LabelledEntry(frm_sidebar, "Balcony pts", self.var_balcony_pts, 7)
-        entry.LabelledEntry(frm_sidebar, "Patio pts", self.var_patio_pts, 8)
-        entry.LabelledEntry(frm_sidebar, "Highest floor pts", self.var_highest_floor_pts, 9)
-        entry.LabelledEntry(frm_sidebar, "Preferred floor pts", self.var_preferred_floor_pts, 10)
-        entry.LabelledEntry(frm_sidebar, "Preferred floor", self.var_preferred_floor, 11)
-        entry.LabelledEntry(frm_sidebar, "Lowest floor pts", self.var_lowest_floor_pts, 12)
-        entry.LabelledEntry(frm_sidebar, "Elevator pts", self.var_elevator_pts, 13)
-        entry.LabelledEntry(frm_sidebar, "Final pts adjustment", self.var_pts_adjust, 14)
+        self.txt_loc_ids = entry.LabelledText(frm_sidebar, "Location IDs", 40, 4, 0, 1)
+        self.txt_search = entry.LabelledText(frm_sidebar, "Text search", 40, 4, 2, 3)
+        entry.LabelledEntry(frm_sidebar, "Max price", self.var_max_price, 4)
+        entry.LabelledEntry(frm_sidebar, "Price pts per kr", self.var_price_mul, 5)
+        entry.LabelledEntry(frm_sidebar, "Fee pts per kr", self.var_fee_mul, 6)
+        entry.LabelledEntry(frm_sidebar, "Size pts per m2", self.var_size_mul, 7)
+        entry.LabelledEntry(frm_sidebar, "Pts per room", self.var_rooms_mul, 8)
+        entry.LabelledEntry(frm_sidebar, "Balcony pts", self.var_balcony_pts, 9)
+        entry.LabelledEntry(frm_sidebar, "Patio pts", self.var_patio_pts, 10)
+        entry.LabelledEntry(frm_sidebar, "Highest floor pts", self.var_highest_floor_pts, 11)
+        entry.LabelledEntry(frm_sidebar, "Preferred floor pts", self.var_preferred_floor_pts, 12)
+        entry.LabelledEntry(frm_sidebar, "Preferred floor", self.var_preferred_floor, 13)
+        entry.LabelledEntry(frm_sidebar, "Lowest floor pts", self.var_lowest_floor_pts, 14)
+        entry.LabelledEntry(frm_sidebar, "Elevator pts", self.var_elevator_pts, 15)
+        entry.LabelledEntry(frm_sidebar, "Final pts adjustment", self.var_pts_adjust, 16)
 
         self.btn_save_settings = tk.Button(frm_sidebar, text="Save Crawler Settings",
                                            command=self.save_crawler_settings)
         self.btn_crawl = tk.Button(frm_sidebar, text="Crawl", command=self.crawl)
         self.btn_save = tk.Button(frm_sidebar, text="Save Items As...", command=self.save_crawler_results)
-        self.btn_save_settings.grid(row=15, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
-        self.btn_crawl.grid(row=16, column=0, sticky="ew", padx=5, pady=5)
-        self.btn_save.grid(row=16, column=1, sticky="ew", padx=5, pady=5)
+        self.btn_save_settings.grid(row=17, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
+        self.btn_crawl.grid(row=18, column=0, sticky="ew", padx=5, pady=5)
+        self.btn_save.grid(row=18, column=1, sticky="ew", padx=5, pady=5)
         self.btn_save["state"] = tk.DISABLED
 
         frm_ribbon = tk.Frame(self)
