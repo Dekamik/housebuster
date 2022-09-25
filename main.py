@@ -151,7 +151,6 @@ class Program(tk.Tk):
         mbn_known = tk.Menubutton(frm_sidebar, text="Select", relief=tk.RAISED)
         mbn_known.menu = tk.Menu(mbn_known, tearoff=0)
         mbn_known["menu"] = mbn_known.menu
-        mbn_known.menu.add_checkbutton(label="All locations")
         for loc in self.config["known_location_ids"].keys():
             self.var_known_locations[loc] = tk.IntVar(self)
             mbn_known.menu.add_checkbutton(label=loc, variable=self.var_known_locations[loc], offvalue=0,

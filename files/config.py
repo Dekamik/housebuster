@@ -23,5 +23,5 @@ def load(path=None) -> dict:
     try:
         return __load__(path)
     except FileNotFoundError:
-        shutil.copy2(f"{common.get_app_dir()}/example.config.yml", __get_config_dir__())
+        shutil.copy2(f"{common.get_app_dir()}/default.config.yml", __get_config_dir__())
         return __load__(path)
