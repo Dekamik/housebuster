@@ -42,7 +42,14 @@ class Program(tk.Tk):
             self.var_msg.set(f"Ready")
             return
 
-        self.save_crawler_settings(True)
+        try:
+            self.save_crawler_settings(True)
+        except tk.TclError:
+            messagebox.showerror("Wrong input format", "Input was formatted the wrong way, "
+                                                       "please correct and try again")
+            self.var_msg.set("Ready")
+            self.update()
+            return
 
         def crawler_results(signal, sender, item, response, spider):
             self.results.append(item)
