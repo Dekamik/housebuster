@@ -13,11 +13,14 @@ crawler_settings:
   rooms_mul: 1000.0
   size_mul: 25.0
 known_location_ids:
-  bromma: 898740
-  enskede: 941046
-  "enskede-skarpn\xE4ck": 941046
-  "gubb\xE4ngen": 473365
-  nacka: 17853
-  solna: 18028
-  stureby: 473424
-  sundbyberg: 18042
+  Bergshamra: 473502
+  Bromma: 898740
+  Enskede: 941046
+  "Enskede-Skarpn\xE4ck": 941046
+  "Gubb\xE4ngen": 473365
+  Nacka: 17853
+  Solna kommun: 18028
+  Stockholms kommun: 18031
+  Stureby: 473424
+  Sundbybergs kommun: 18042
+  "Tyres\xF6 kommun": 17792

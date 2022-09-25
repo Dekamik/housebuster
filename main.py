@@ -31,24 +31,10 @@ class Program(tk.Tk):
             location_ids = location_ids[:-1]
 
         if location_ids is None or len(location_ids) == 0:
-            search_text = self.txt_search.text.get("1.0", tk.END) \
-                .replace("\n", ",") \
-                .replace(",,", ",") \
-                .replace(", ", ",") \
-                .strip()
-            if search_text[-1] == ",":
-                search_text = search_text[:-1]
-
             loc_ids = []
-            for loc in search_text.split(","):
-                if loc in self.config["known_location_ids"]:
-                    loc_ids.append(str(self.config["known_location_ids"][loc]))
-                elif len(loc) != 0:
-                    response = messagebox.askyesno("Unknown location", f"Location ID for {loc} is unknown, "
-                                                                       f"continue without it?")
-                    if response == tk.NO:
-                        self.var_msg.set(f"Ready")
-                        return
+            for val in self.var_known_locations.values():
+                if val.get() != 0:
+                    loc_ids.append(str(val.get()))
             location_ids = ",".join(loc_ids)
 
         if location_ids is None or len(location_ids) == 0:
@@ -105,6 +91,16 @@ class Program(tk.Tk):
             dw.writeheader()
             dw.writerows(self.results)
 
+    def select_known_location(self):
+        selected_locations_amount = 0
+        for val in self.var_known_locations.values():
+            if val.get() != 0:
+                selected_locations_amount += 1
+        if selected_locations_amount != 0:
+            self.var_known_locations_label.set(f"Known locations ({selected_locations_amount})")
+        else:
+            self.var_known_locations_label.set(f"Known locations")
+
     def __init__(self):
         tk.Tk.__init__(self)
         self.has_been_run = False
@@ -120,7 +116,8 @@ class Program(tk.Tk):
 
         # Variables
         self.results = []
-        self.var_search = tk.StringVar(self)
+        self.var_known_locations = {}
+        self.var_known_locations_label = tk.StringVar(self, value="Known locations")
         self.var_max_price = tk.IntVar(self, value=crawler_settings["max_price"])
         self.var_price_mul = tk.DoubleVar(self, value=crawler_settings["price_mul"])
         self.var_fee_mul = tk.DoubleVar(self, value=crawler_settings["fee_mul"])
@@ -144,7 +141,20 @@ class Program(tk.Tk):
         frm_sidebar = tk.Frame(self, relief=tk.RAISED, bd=2)
 
         self.txt_loc_ids = entry.LabelledText(frm_sidebar, "Location IDs", 40, 4, 0, 1)
-        self.txt_search = entry.LabelledText(frm_sidebar, "Text search", 40, 4, 2, 3)
+
+        lbl_known = tk.Label(frm_sidebar, textvariable=self.var_known_locations_label)
+        mbn_known = tk.Menubutton(frm_sidebar, text="Select", relief=tk.RAISED)
+        mbn_known.menu = tk.Menu(mbn_known, tearoff=0)
+        mbn_known["menu"] = mbn_known.menu
+        mbn_known.menu.add_checkbutton(label="All locations")
+        for loc in self.config["known_location_ids"].keys():
+            self.var_known_locations[loc] = tk.IntVar(self)
+            mbn_known.menu.add_checkbutton(label=loc, variable=self.var_known_locations[loc], offvalue=0,
+                                           onvalue=self.config["known_location_ids"][loc],
+                                           command=self.select_known_location)
+        lbl_known.grid(row=2, column=0, sticky="e", padx=5, pady=5)
+        mbn_known.grid(row=2, column=1, sticky="w", padx=5, pady=5)
+
         entry.LabelledEntry(frm_sidebar, "Max price", self.var_max_price, 4)
         entry.LabelledEntry(frm_sidebar, "Price pts per kr", self.var_price_mul, 5)
         entry.LabelledEntry(frm_sidebar, "Fee pts per kr", self.var_fee_mul, 6)
