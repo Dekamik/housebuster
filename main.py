@@ -56,11 +56,16 @@ class Program(tk.Tk):
         process.crawl(HemnetSpider, ids=location_ids)
         process.start()
 
+        if len(self.results) == 0:
+            messagebox.showinfo("Scraping done", "No items found")
+            self.var_msg.set("Ready")
+            return
+
         self.sht_results.headers([column for column in self.results[0].keys()])
         self.sht_results.set_sheet_data([[column for column in row.values()] for row in self.results])
 
         self.btn_save["state"] = tk.NORMAL
-        self.var_msg.set(f"Ready")
+        self.var_msg.set("Ready")
         messagebox.showinfo("Scraping done", f"Scraped {len(self.results)} items")
 
     def save_crawler_settings(self, supress_msg_box=False):
