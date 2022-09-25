@@ -14,7 +14,7 @@ def __load__() -> dict:
         return yaml.safe_load(stream)
 
 
-def save(config_data):
+def save(config_data: dict):
     with open(__get_config_dir__(), "w") as stream:
         yaml.safe_dump(config_data, stream)
 

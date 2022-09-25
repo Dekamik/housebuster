@@ -20,22 +20,15 @@ class Program(tk.Tk):
         self.results = []
         self.var_msg.set("Initializing, please wait...")
 
-        parsed_search_text = self.txt_search.get("1.0", tk.END)\
+        search_text = self.txt_search.get("1.0", tk.END)\
             .replace("\n", ",")\
             .replace(",,", ",")\
             .replace(", ", ",")\
             .strip()
-        if parsed_search_text[-1] == ",":
-            parsed_search_text = parsed_search_text[:-1]
+        if search_text[-1] == ",":
+            search_text = search_text[:-1]
 
-        try:
-            parsed_max_price = self.var_max_price.get()
-            if parsed_max_price == 0:
-                self.var_msg.set("ERROR: Max price cannot be 0")
-                return
-        except tk.TclError as e:
-            self.var_msg.set(f"ERROR: Max price {e}")
-            return
+        self.save_crawler_settings(True)
 
         def crawler_results(signal, sender, item, response, spider):
             self.results.append(item)
@@ -46,7 +39,7 @@ class Program(tk.Tk):
 
         self.has_been_run = True
         process = CrawlerProcess()
-        process.crawl(HemnetSpider, names=parsed_search_text, max_price=parsed_max_price)
+        process.crawl(HemnetSpider, names=search_text)
         process.start()
 
         self.sht_results.headers([column for column in self.results[0].keys()])
@@ -56,10 +49,12 @@ class Program(tk.Tk):
         self.var_msg.set(f"Ready")
         messagebox.showinfo("Scraping done", f"Scraped {len(self.results)} items")
 
-    def save_crawler_settings(self):
+    def save_crawler_settings(self, supress_msg_box=False):
         self.config["crawler_settings"]["max_price"] = self.var_max_price.get()
         self.config["crawler_settings"]["price_mul"] = self.var_price_mul.get()
         self.config["crawler_settings"]["fee_mul"] = self.var_fee_mul.get()
+        self.config["crawler_settings"]["size_mul"] = self.var_size_mul.get()
+        self.config["crawler_settings"]["rooms_mul"] = self.var_rooms_mul.get()
         self.config["crawler_settings"]["balcony_bias"] = self.var_balcony_bias.get()
         self.config["crawler_settings"]["patio_bias"] = self.var_patio_bias.get()
         self.config["crawler_settings"]["highest_floor_bias"] = self.var_highest_floor_bias.get()
@@ -68,7 +63,8 @@ class Program(tk.Tk):
         self.config["crawler_settings"]["lowest_floor_bias"] = self.var_lowest_floor_bias.get()
         self.config["crawler_settings"]["elevator_bias"] = self.var_elevator_bias.get()
         config.save(self.config)
-        messagebox.showinfo("Saved", "Crawler settings saved")
+        if not supress_msg_box:
+            messagebox.showinfo("Saved", "Crawler settings saved")
 
     def save_crawler_results(self):
         pass

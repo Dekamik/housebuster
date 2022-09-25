@@ -5,7 +5,8 @@ import unicodedata
 
 import scrapy
 
-from crawlers.hemnet_data import FeatureAnalysisConfig
+from crawlers import hemnet_analysis
+from files import config
 
 hemnet_known_location_ids = {
     "bromma": "898740",
@@ -30,58 +31,26 @@ def parse_currency(raw, denomination) -> int:
                .replace(" ", "").strip())
 
 
-def get_price_index(price, fee, price_mul, fee_mul) -> float:
-    return (price * price_mul) + (fee * fee_mul)
-
-
-def get_size_index(size, rooms, size_mul, rooms_mul) -> float:
-    return (size * size_mul) + (rooms * rooms_mul)
-
-
-def get_features_index(balcony, patio, floor, has_elevator, config: FeatureAnalysisConfig) -> float:
-    features_index = 0
-
-    if balcony == "Ja":
-        features_index += config.balcony_bias
-
-    if patio == "Ja":
-        features_index += config.patio_bias
-
-    if floor[0:1] == floor[5:6]:
-        features_index += config.highest_floor_bias
-
-    if floor[0:1] in ("0", "1", "-"):
-        features_index += config.lowest_floor_bias
-
-    if len(floor) > 1 and floor[0:floor.index(" ")] == config.preferred_floor:
-        features_index += config.nth_floor_bias
-
-    if has_elevator:
-        features_index += config.elevator_bias
-
-    return features_index
-
-
 class HemnetSpider(scrapy.Spider):
     name = "housespider"
 
-    def __init__(self, ids=None, names=None, max_price=2500000, *args, **kwargs):
+    def __init__(self, ids=None, names=None, *args, **kwargs):
         super(HemnetSpider, self).__init__(*args, **kwargs)
         self.ids = ids
         self.names = names
-        self.max_price = max_price
+        self.config = config.load()["crawler_settings"]
 
     def start_requests(self):
         urls = []
         if self.ids is not None:
             for location_id in self.ids.split(","):
-                urls.append(build_url([location_id], ["bostadsratt"], self.max_price))
+                urls.append(build_url([location_id], ["bostadsratt"], self.config["max_price"]))
         elif self.names is not None:
             for name in self.names.split(","):
-                urls.append(build_url([hemnet_known_location_ids[name]], ["bostadsratt"], self.max_price))
+                urls.append(build_url([hemnet_known_location_ids[name]], ["bostadsratt"], self.config["max_price"]))
         else:
             for location_id in hemnet_known_location_ids.values():
-                urls.append(build_url([location_id], ["bostadsratt"], self.max_price))
+                urls.append(build_url([location_id], ["bostadsratt"], self.config["max_price"]))
 
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
@@ -115,10 +84,18 @@ class HemnetSpider(scrapy.Spider):
             price_m2 = parse_currency(response.css("dd.property-attributes-table__value::text")
                                       .re_first("^.+kr\/m²"), "kr/m2")
 
+            analysis_settings = hemnet_analysis.FeatureAnalysisConfig(self.config["balcony_bias"],
+                                                                      self.config["patio_bias"],
+                                                                      self.config["highest_floor_bias"],
+                                                                      self.config["preferred_floor_bias"],
+                                                                      self.config["preferred_floor"],
+                                                                      self.config["lowest_floor_bias"],
+                                                                      self.config["elevator_bias"])
+
             # Indices - The lower the number, the better
-            price_idx = get_price_index(price, fee)
-            size_idx = get_size_index(size, rooms)
-            features_idx = get_features_index(balcony, patio, floor, has_elevator)
+            price_idx = hemnet_analysis.get_price_index(price, fee, self.config["price_mul"], self.config["fee_mul"])
+            size_idx = hemnet_analysis.get_size_index(size, rooms, self.config["size_mul"], self.config["rooms_mul"])
+            features_idx = hemnet_analysis.get_features_index(balcony, patio, floor, has_elevator, analysis_settings)
             total_idx = price_idx + size_idx + features_idx
 
             yield {
@@ -137,10 +114,7 @@ class HemnetSpider(scrapy.Spider):
                 "Avgift": fee,
                 "Driftkostnad": operational_costs,
                 "Pris/m2": price_m2,
-                "Prisindex": price_idx,
-                "Storleksindex": size_idx,
-                "Funktionsindex": features_idx,
-                "Totalindex": total_idx,
+                "Index": total_idx,
                 "Länk": response.url
             }
 
