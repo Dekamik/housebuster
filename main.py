@@ -57,19 +57,21 @@ class Program(tk.Tk):
         self.config["crawler_settings"]["fee_mul"] = self.var_fee_mul.get()
         self.config["crawler_settings"]["size_mul"] = self.var_size_mul.get()
         self.config["crawler_settings"]["rooms_mul"] = self.var_rooms_mul.get()
-        self.config["crawler_settings"]["balcony_bias"] = self.var_balcony_bias.get()
-        self.config["crawler_settings"]["patio_bias"] = self.var_patio_bias.get()
-        self.config["crawler_settings"]["highest_floor_bias"] = self.var_highest_floor_bias.get()
-        self.config["crawler_settings"]["preferred_floor_bias"] = self.var_preferred_floor_bias.get()
+        self.config["crawler_settings"]["balcony_pts"] = self.var_balcony_pts.get()
+        self.config["crawler_settings"]["patio_pts"] = self.var_patio_pts.get()
+        self.config["crawler_settings"]["highest_floor_pts"] = self.var_highest_floor_pts.get()
+        self.config["crawler_settings"]["preferred_floor_pts"] = self.var_preferred_floor_pts.get()
         self.config["crawler_settings"]["preferred_floor"] = self.var_preferred_floor.get()
-        self.config["crawler_settings"]["lowest_floor_bias"] = self.var_lowest_floor_bias.get()
-        self.config["crawler_settings"]["elevator_bias"] = self.var_elevator_bias.get()
+        self.config["crawler_settings"]["lowest_floor_pts"] = self.var_lowest_floor_pts.get()
+        self.config["crawler_settings"]["elevator_pts"] = self.var_elevator_pts.get()
+        self.config["crawler_settings"]["pts_adjust"] = self.var_pts_adjust.get()
         config.save(self.config)
         if not supress_msg_box:
             messagebox.showinfo("Saved", "Crawler settings saved")
 
     def save_crawler_results(self):
-        with tkinter.filedialog.asksaveasfile(mode="w", filetypes=[("CSV files", "*.csv"), ("All files", "*.*")], defaultextension=".csv") as f:
+        with tkinter.filedialog.asksaveasfile(mode="w", filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+                                              defaultextension=".csv") as f:
             if f is None:
                 return
             keys = self.results[0].keys()
@@ -98,16 +100,16 @@ class Program(tk.Tk):
         self.var_fee_mul = tk.DoubleVar(self, value=crawler_settings["fee_mul"])
         self.var_size_mul = tk.DoubleVar(self, value=crawler_settings["size_mul"])
         self.var_rooms_mul = tk.DoubleVar(self, value=crawler_settings["rooms_mul"])
-        self.var_balcony_bias = tk.IntVar(self, value=crawler_settings["balcony_bias"])
-        self.var_patio_bias = tk.IntVar(self, value=crawler_settings["patio_bias"])
-        self.var_highest_floor_bias = tk.IntVar(self, value=crawler_settings["highest_floor_bias"])
-        self.var_preferred_floor_bias = tk.IntVar(self, value=crawler_settings["preferred_floor_bias"])
+        self.var_balcony_pts = tk.IntVar(self, value=crawler_settings["balcony_pts"])
+        self.var_patio_pts = tk.IntVar(self, value=crawler_settings["patio_pts"])
+        self.var_highest_floor_pts = tk.IntVar(self, value=crawler_settings["highest_floor_pts"])
+        self.var_preferred_floor_pts = tk.IntVar(self, value=crawler_settings["preferred_floor_pts"])
         self.var_preferred_floor = tk.StringVar(self, value=crawler_settings["preferred_floor"])
-        self.var_lowest_floor_bias = tk.IntVar(self, value=crawler_settings["lowest_floor_bias"])
-        self.var_elevator_bias = tk.IntVar(self, value=crawler_settings["elevator_bias"])
+        self.var_lowest_floor_pts = tk.IntVar(self, value=crawler_settings["lowest_floor_pts"])
+        self.var_elevator_pts = tk.IntVar(self, value=crawler_settings["elevator_pts"])
+        self.var_pts_adjust = tk.IntVar(self, value=crawler_settings["pts_adjust"])
 
         self.var_msg = tk.StringVar(self)
-        self.var_crawl_log = tk.StringVar(self)
 
         self.var_msg.set("Ready")
 
@@ -121,24 +123,26 @@ class Program(tk.Tk):
         self.txt_search.grid(row=1, column=0, columnspan=3, sticky="ns", padx=5, pady=5)
 
         entry.LabelledEntry(frm_sidebar, "Max price", self.var_max_price, 2)
-        entry.LabelledEntry(frm_sidebar, "Price bias multiplier", self.var_price_mul, 3)
-        entry.LabelledEntry(frm_sidebar, "Fee bias multiplier", self.var_fee_mul, 4)
-        entry.LabelledEntry(frm_sidebar, "Size bias multiplier", self.var_size_mul, 5)
-        entry.LabelledEntry(frm_sidebar, "Rooms bias multiplier", self.var_rooms_mul, 6)
-        entry.LabelledEntry(frm_sidebar, "Balcony bias", self.var_balcony_bias, 7)
-        entry.LabelledEntry(frm_sidebar, "Patio bias", self.var_patio_bias, 8)
-        entry.LabelledEntry(frm_sidebar, "Highest floor bias", self.var_highest_floor_bias, 9)
-        entry.LabelledEntry(frm_sidebar, "Preferred floor bias", self.var_preferred_floor_bias, 10)
+        entry.LabelledEntry(frm_sidebar, "Price pts mul", self.var_price_mul, 3)
+        entry.LabelledEntry(frm_sidebar, "Fee pts mul", self.var_fee_mul, 4)
+        entry.LabelledEntry(frm_sidebar, "Size pts mul", self.var_size_mul, 5)
+        entry.LabelledEntry(frm_sidebar, "Rooms pts mul", self.var_rooms_mul, 6)
+        entry.LabelledEntry(frm_sidebar, "Balcony pts", self.var_balcony_pts, 7)
+        entry.LabelledEntry(frm_sidebar, "Patio pts", self.var_patio_pts, 8)
+        entry.LabelledEntry(frm_sidebar, "Highest floor pts", self.var_highest_floor_pts, 9)
+        entry.LabelledEntry(frm_sidebar, "Preferred floor pts", self.var_preferred_floor_pts, 10)
         entry.LabelledEntry(frm_sidebar, "Preferred floor", self.var_preferred_floor, 11)
-        entry.LabelledEntry(frm_sidebar, "Lowest floor bias", self.var_lowest_floor_bias, 12)
-        entry.LabelledEntry(frm_sidebar, "Elevator bias", self.var_elevator_bias, 13)
+        entry.LabelledEntry(frm_sidebar, "Lowest floor pts", self.var_lowest_floor_pts, 12)
+        entry.LabelledEntry(frm_sidebar, "Elevator pts", self.var_elevator_pts, 13)
+        entry.LabelledEntry(frm_sidebar, "Final pts adjustment", self.var_pts_adjust, 14)
 
-        self.btn_save_settings = tk.Button(frm_sidebar, text="Save Crawler Settings", command=self.save_crawler_settings)
+        self.btn_save_settings = tk.Button(frm_sidebar, text="Save Crawler Settings",
+                                           command=self.save_crawler_settings)
         self.btn_crawl = tk.Button(frm_sidebar, text="Crawl", command=self.crawl)
         self.btn_save = tk.Button(frm_sidebar, text="Save Items As...", command=self.save_crawler_results)
-        self.btn_save_settings.grid(row=14, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
-        self.btn_crawl.grid(row=15, column=0, sticky="ew", padx=5, pady=5)
-        self.btn_save.grid(row=15, column=1, sticky="ew", padx=5, pady=5)
+        self.btn_save_settings.grid(row=15, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
+        self.btn_crawl.grid(row=16, column=0, sticky="ew", padx=5, pady=5)
+        self.btn_save.grid(row=16, column=1, sticky="ew", padx=5, pady=5)
         self.btn_save["state"] = tk.DISABLED
 
         frm_ribbon = tk.Frame(self)

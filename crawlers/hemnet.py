@@ -87,19 +87,18 @@ class HemnetSpider(scrapy.Spider):
             price_m2 = parse_currency(response.css("dd.property-attributes-table__value::text")
                                       .re_first("^.+kr\/m²"), "kr/m2")
 
-            analysis_settings = hemnet_analysis.FeatureAnalysisConfig(self.config["balcony_bias"],
-                                                                      self.config["patio_bias"],
-                                                                      self.config["highest_floor_bias"],
-                                                                      self.config["preferred_floor_bias"],
+            analysis_settings = hemnet_analysis.FeatureAnalysisConfig(self.config["balcony_pts"],
+                                                                      self.config["patio_pts"],
+                                                                      self.config["highest_floor_pts"],
+                                                                      self.config["preferred_floor_pts"],
                                                                       self.config["preferred_floor"],
-                                                                      self.config["lowest_floor_bias"],
-                                                                      self.config["elevator_bias"])
+                                                                      self.config["lowest_floor_pts"],
+                                                                      self.config["elevator_pts"])
 
-            # Indices - The lower the number, the better
-            price_idx = hemnet_analysis.get_price_index(price, fee, self.config["price_mul"], self.config["fee_mul"])
-            size_idx = hemnet_analysis.get_size_index(size, rooms, self.config["size_mul"], self.config["rooms_mul"])
-            features_idx = hemnet_analysis.get_features_index(balcony, patio, floor, has_elevator, analysis_settings)
-            total_idx = price_idx + size_idx + features_idx
+            price_pts = hemnet_analysis.get_price_pts(price, fee, self.config["price_mul"], self.config["fee_mul"])
+            size_pts = hemnet_analysis.get_size_pts(size, rooms, self.config["size_mul"], self.config["rooms_mul"])
+            features_pts = hemnet_analysis.get_features_pts(balcony, patio, floor, has_elevator, analysis_settings)
+            total_pts = price_pts + size_pts + features_pts + self.config["pts_adjust"]
 
             yield {
                 "Adress": response.xpath("//h1[contains(@class, 'qa-property-heading')]/text()").get(),
@@ -117,7 +116,7 @@ class HemnetSpider(scrapy.Spider):
                 "Avgift": fee,
                 "Driftkostnad": operational_costs,
                 "Pris/m2": price_m2,
-                "Index": total_idx,
+                "Poäng": int(total_pts),
                 "Länk": response.url
             }
 

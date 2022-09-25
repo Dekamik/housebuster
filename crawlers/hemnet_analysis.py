@@ -14,15 +14,15 @@ class FeatureAnalysisConfig:
     elevator_bias: float
 
 
-def get_price_index(price, fee, price_mul, fee_mul) -> float:
+def get_price_pts(price, fee, price_mul, fee_mul) -> float:
     return (price * price_mul) + (fee * fee_mul)
 
 
-def get_size_index(size, rooms, size_mul, rooms_mul) -> float:
+def get_size_pts(size, rooms, size_mul, rooms_mul) -> float:
     return (size * size_mul) + (rooms * rooms_mul)
 
 
-def get_features_index(balcony, patio, floor, has_elevator, settings: FeatureAnalysisConfig) -> float:
+def get_features_pts(balcony, patio, floor, has_elevator, settings: FeatureAnalysisConfig) -> float:
     features_index = 0
 
     if balcony == "Ja":
