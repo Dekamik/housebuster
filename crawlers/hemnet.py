@@ -8,17 +8,6 @@ import scrapy
 from crawlers import hemnet_analysis
 from files import config
 
-hemnet_known_location_ids = {
-    "bromma": "898740",
-    "enskede": "925961",
-    "enskede-skarpnäck": "941046",
-    "gubbängen": "473365",
-    "nacka": "17853",
-    "solna": "18028",
-    "stureby": "473424",
-    "sundbyberg": "18042"
-}
-
 
 def build_url(location_ids: list, item_types: list, price_max: int) -> str:
     location_id_params = "&".join([f"location_ids%5B%5D={location_id}" for location_id in location_ids])
@@ -45,15 +34,11 @@ class HemnetSpider(scrapy.Spider):
 
     def start_requests(self):
         urls = []
-        if self.ids is not None:
+        if self.ids is not None and len(self.ids) != 0:
             for location_id in self.ids.split(","):
                 urls.append(build_url([location_id], ["bostadsratt"], self.config["max_price"]))
-        elif self.names is not None:
-            for name in self.names.split(","):
-                urls.append(build_url([hemnet_known_location_ids[name]], ["bostadsratt"], self.config["max_price"]))
         else:
-            for location_id in hemnet_known_location_ids.values():
-                urls.append(build_url([location_id], ["bostadsratt"], self.config["max_price"]))
+            raise ValueError("ids must be set")
 
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)

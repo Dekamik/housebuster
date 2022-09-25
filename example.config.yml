@@ -12,3 +12,12 @@ crawler_settings:
   pts_adjust: 0
   rooms_mul: 1000.0
   size_mul: 25.0
+known_location_ids:
+  bromma: 898740
+  enskede: 941046
+  "enskede-skarpn\xE4ck": 941046
+  "gubb\xE4ngen": 473365
+  nacka: 17853
+  solna: 18028
+  stureby: 473424
+  sundbyberg: 18042

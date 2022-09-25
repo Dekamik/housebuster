@@ -22,13 +22,30 @@ class Program(tk.Tk):
         self.var_msg.set("Initializing, please wait...")
         self.update()
 
-        search_text = self.txt_search.text.get("1.0", tk.END)\
+        location_ids = self.txt_loc_ids.text.get("1.0", tk.END)\
             .replace("\n", ",")\
             .replace(",,", ",")\
             .replace(", ", ",")\
             .strip()
-        if search_text[-1] == ",":
-            search_text = search_text[:-1]
+        if location_ids[-1] == ",":
+            location_ids = location_ids[:-1]
+
+        if location_ids is None or len(location_ids) == 0:
+            search_text = self.txt_search.text.get("1.0", tk.END) \
+                .replace("\n", ",") \
+                .replace(",,", ",") \
+                .replace(", ", ",") \
+                .strip()
+            if search_text[-1] == ",":
+                search_text = search_text[:-1]
+
+            loc_ids = []
+            for loc in search_text.split(","):
+                if loc in self.config["known_location_ids"]:
+                    loc_ids.append(str(self.config["known_location_ids"][loc]))
+                else:
+                    messagebox.askyesno("Unknown location", f"Location ID for {loc} is unknown, continue without it?")
+            location_ids = ",".join(loc_ids)
 
         self.save_crawler_settings(True)
 
@@ -41,7 +58,7 @@ class Program(tk.Tk):
 
         self.has_been_run = True
         process = CrawlerProcess()
-        process.crawl(HemnetSpider, names=search_text)
+        process.crawl(HemnetSpider, ids=location_ids)
         process.start()
 
         self.sht_results.headers([column for column in self.results[0].keys()])

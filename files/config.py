@@ -10,12 +10,12 @@ def __get_config_dir__() -> str:
 
 
 def __load__(path=None) -> dict:
-    with open(path or __get_config_dir__(), "r") as stream:
+    with open(path or __get_config_dir__(), "r", encoding="utf8") as stream:
         return yaml.safe_load(stream)
 
 
 def save(config_data: dict, path=None):
-    with open(path or __get_config_dir__(), "w") as stream:
+    with open(path or __get_config_dir__(), "w", encoding="utf8") as stream:
         yaml.safe_dump(config_data, stream)
 
 
