@@ -16,8 +16,8 @@ from files import config
 class Program(tk.Tk):
     def crawl(self):
         if self.has_been_run:
-            messagebox.showerror("Restart program", "Crawler cannot run twice due to technical limitations.\n"
-                                                    "Please restart the program to run again")
+            messagebox.showwarning("Restart program", "Crawler cannot run twice due to technical limitations.\n"
+                                                      "Please restart the program to run again")
         self.results = []
         self.var_msg.set("Initializing, please wait...")
         self.update()
@@ -43,9 +43,18 @@ class Program(tk.Tk):
             for loc in search_text.split(","):
                 if loc in self.config["known_location_ids"]:
                     loc_ids.append(str(self.config["known_location_ids"][loc]))
-                else:
-                    messagebox.askyesno("Unknown location", f"Location ID for {loc} is unknown, continue without it?")
+                elif len(loc) != 0:
+                    response = messagebox.askyesno("Unknown location", f"Location ID for {loc} is unknown, "
+                                                                       f"continue without it?")
+                    if response == tk.NO:
+                        self.var_msg.set(f"Ready")
+                        return
             location_ids = ",".join(loc_ids)
+
+        if location_ids is None or len(location_ids) == 0:
+            messagebox.showwarning("Empty search", "Location IDs and Text search empty or invalid")
+            self.var_msg.set(f"Ready")
+            return
 
         self.save_crawler_settings(True)
 
