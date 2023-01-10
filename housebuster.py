@@ -9,18 +9,19 @@ import tkinter.filedialog
 from tkinter import messagebox
 
 import tksheet as tks
-from scrapy import signals
-from scrapy.crawler import CrawlerProcess
-from scrapy.signalmanager import dispatcher
 
 from gui import entry
-from crawlers.hemnet import HemnetSpider
 from files import config
 
 
 class Program(tk.Tk):
     def crawl(self):
+        if os.path.exists(tmp_file):
+            os.remove(tmp_file)
+
         self.results = []
+        self.sht_results.headers([])
+        self.sht_results.set_sheet_data([])
         self.var_msg.set("Initializing, please wait...")
         self.update()
 
@@ -56,16 +57,13 @@ class Program(tk.Tk):
         self.var_msg.set("Crawling...")
         self.update()
 
-        self.tmp_file = self.new_tmp_file()
-        subprocess.run(f"scrapy runspider crawlers/hemnet.py -o {self.tmp_file}")
+        self.tmp_file = "tmp.csv"
+        subprocess.run(f"scrapy runspider crawlers/hemnet.py -a ids={location_ids} -o \"{self.tmp_file}:csv\"")
 
-        with open(self.tmp_file, mode = "r") as f:
-            w = csv.DictReader(f)
-
-        if len(self.results) == 0:
-            messagebox.showinfo("Scraping done", "No items found")
-            self.var_msg.set("Ready")
-            return
+        with open(self.tmp_file, mode="r", encoding="utf8") as f:
+            csv_file = csv.DictReader(f)
+            for lines in csv_file:
+                self.results.append(lines)
 
         self.sht_results.headers([column for column in self.results[0].keys()])
         self.sht_results.set_sheet_data([[column for column in row.values()] for row in self.results])
@@ -112,13 +110,9 @@ class Program(tk.Tk):
         else:
             self.var_known_locations_label.set(f"Known locations")
 
-    def new_tmp_file(self):
-        return f"{self.tmp_dir}/{''.join(random.choice(string.digits) for _ in range(20))}.csv"
-
-    def __init__(self, tmp_dir):
+    def __init__(self, tmp_path):
         tk.Tk.__init__(self)
-        self.tmp_dir = tmp_dir
-        self.tmp_file = None
+        self.tmp_file = tmp_path
 
         # Configuration
         self.title("housebuster")
@@ -203,11 +197,10 @@ class Program(tk.Tk):
 
 
 if __name__ == "__main__":
-    tmp_path = None
+    tmp_file = "tmp.csv"
     try:
-        tmp_path = tempfile.mkdtemp(prefix="housebuster")
-        app = Program(tmp_path)
+        app = Program(tmp_file)
         app.mainloop()
     finally:
-        if tmp_path is not None:
-            os.remove(tmp_path)
+        if os.path.exists(tmp_file):
+            os.remove(tmp_file)
