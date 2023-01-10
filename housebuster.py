@@ -1,4 +1,9 @@
 import csv
+import os
+import random
+import string
+import subprocess
+import tempfile
 import tkinter as tk
 import tkinter.filedialog
 from tkinter import messagebox
@@ -8,16 +13,13 @@ from scrapy import signals
 from scrapy.crawler import CrawlerProcess
 from scrapy.signalmanager import dispatcher
 
-from components import entry
+from gui import entry
 from crawlers.hemnet import HemnetSpider
 from files import config
 
 
 class Program(tk.Tk):
     def crawl(self):
-        if self.has_been_run:
-            messagebox.showwarning("Restart program", "Crawler cannot run twice due to technical limitations.\n"
-                                                      "Please restart the program to run again")
         self.results = []
         self.var_msg.set("Initializing, please wait...")
         self.update()
@@ -51,17 +53,14 @@ class Program(tk.Tk):
             self.update()
             return
 
-        def crawler_results(signal, sender, item, response, spider):
-            self.results.append(item)
-            self.var_msg.set(f"Scraping item {len(self.results)}")
-            self.update()
+        self.var_msg.set("Crawling...")
+        self.update()
 
-        dispatcher.connect(crawler_results, signal=signals.item_scraped)
+        self.tmp_file = self.new_tmp_file()
+        subprocess.run(f"scrapy runspider crawlers/hemnet.py -o {self.tmp_file}")
 
-        self.has_been_run = True
-        process = CrawlerProcess()
-        process.crawl(HemnetSpider, ids=location_ids)
-        process.start()
+        with open(self.tmp_file, mode = "r") as f:
+            w = csv.DictReader(f)
 
         if len(self.results) == 0:
             messagebox.showinfo("Scraping done", "No items found")
@@ -113,9 +112,13 @@ class Program(tk.Tk):
         else:
             self.var_known_locations_label.set(f"Known locations")
 
-    def __init__(self):
+    def new_tmp_file(self):
+        return f"{self.tmp_dir}/{''.join(random.choice(string.digits) for _ in range(20))}.csv"
+
+    def __init__(self, tmp_dir):
         tk.Tk.__init__(self)
-        self.has_been_run = False
+        self.tmp_dir = tmp_dir
+        self.tmp_file = None
 
         # Configuration
         self.title("housebuster")
@@ -199,5 +202,12 @@ class Program(tk.Tk):
         frm_ribbon.grid(row=1, column=0, columnspan=2, sticky="ws")
 
 
-app = Program()
-app.mainloop()
+if __name__ == "__main__":
+    tmp_path = None
+    try:
+        tmp_path = tempfile.mkdtemp(prefix="housebuster")
+        app = Program(tmp_path)
+        app.mainloop()
+    finally:
+        if tmp_path is not None:
+            os.remove(tmp_path)

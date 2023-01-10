@@ -21,7 +21,7 @@ def parse_currency(raw, denomination) -> int:
 
 
 class HemnetSpider(scrapy.Spider):
-    name = "housespider"
+    name = "hemnet"
 
     def __init__(self, ids=None, names=None, config_path=None, *args, **kwargs):
         super(HemnetSpider, self).__init__(*args, **kwargs)
